@@ -43,7 +43,6 @@ class Mysql extends Connection
         if (!empty($config['charset'])) {
             $dsn .= ';charset=' . $config['charset'];
         }
-        $this->options[\PDO::ATTR_PERSISTENT]=true;
         return $dsn;
     }
 
