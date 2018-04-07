@@ -62,6 +62,8 @@ class Redis extends Driver
         }
     }
 
+    public function getHandler(){return $this->handler;}
+
     /**
      * 判断缓存
      * @access public

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>API测试页面</title>
+</head>
+<body style="background-color: gray;">
+	<br/>
+    <p>1.APP第三方登录成功向服务端提交信息:</p>
+    <form action="/portal/index.php/api/login/sendOauthUserInfo" method="post">
+		用户来源（wechat、qq、sina、）：<input name="platform" type="text" /></br>
+        名称(name)：<input name="name" type="text" /></br>
+        头像url(head_img)：<input name="head_img" type="text" /></br>
+        性别(1：男；2：女)：<input name="sex" type="text" /></br>
+        access_token：<input name="access_token" type="text" /></br>
+        expires_in（access_token过期时间）：<input name="expires_date" type="text" /></br>
+        openid：<input name="openid" type="text" /></br>
+        <input type="submit" value="提交"/>
+    </form>
+	<br/>
+
+</body>
