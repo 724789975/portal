@@ -178,7 +178,7 @@ class Login
     	}else{
     		$ret = array("code"=>500,"descrp"=>"登录失败");
 		}
-		\Think\Log::record("sendOauthUserInfo ret : " .json_encode($ret),'ERR');
+		\Think\Log::record("sendOauthUserInfo ret : " .json_encode($ret),'INFO');
     	die(json_encode($ret));
     }
 }
