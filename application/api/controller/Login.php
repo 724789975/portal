@@ -25,6 +25,9 @@ class Login
         $oauth_user["access_token"] = $_POST["access_token"];
         $oauth_user["expires_date"] = $_POST["expires_date"];
         $oauth_user["openid"] = $_POST["openid"];
+        $login_server_id = $_POST["server_id"];
+
+        $last_login_server_id = 0;
 
         if (isset($_POST["sex"]))
         {
@@ -76,7 +79,10 @@ class Login
             $find_user = Db::table("users")->where(array("id"=>$find_oauth_user['uid']))->find();
             if(!empty($find_user))
             {
+                $last_login_server_id = $find_user["login_server_id"];
                 Db::table("oauth_user")->where(array("openid"=>$oauth_user['openid']))->order("id ASC")->update($oauth_user);
+                $find_user["login_server_id"] = $login_server_id;
+                Db::table("users")->where(array("id"=>$find_oauth_user['uid']))->update($find_user);
                 $need_register = false;
             }
         }
@@ -90,6 +96,7 @@ class Login
                 "create_time" => date("Y-m-d H:i:s"),
                 "balance"   => $balance,
                 "game_coin" => $game_coin,
+                "login_server_id" => $login_server_id,
             );
             $new_user_id = Db::table("users")->insert($new_user_data, true, true);
 
@@ -132,7 +139,7 @@ class Login
 	    			"nick_name" => $oauth_user["name"],
 	    			"avatar" => $oauth_user["head_img"],
 	    			"sex" => $oauth_user["sex"],
-	    			"balance" => $new_user_data["balance"],
+                    "balance" => $new_user_data["balance"],
                 );
                 $create_time = date("Y-m-d H:i:s"); 
                 $uid = $new_user_id;
@@ -152,7 +159,7 @@ class Login
 	    			"nick_name" => $find_user["nick_name"],
 	    			"avatar" => $find_oauth_user['head_img'],
 	    			"sex" => $find_oauth_user["sex"],
-	    			"balance" => $find_user["balance"],
+                    "balance" => $find_user["balance"],
 	    		);
                 $create_time = $find_user["create_time"]; 
                 $uid = $find_oauth_user["uid"];
@@ -166,6 +173,8 @@ class Login
                 }
             }
 
+            $redis->getHandler()->hset($uid."_role", "login_server_id", $login_server_id);
+
 			$s = array(
 				"uid" => $uid,
 				"create_time" => $create_time,
@@ -174,7 +183,8 @@ class Login
             );
             Db::table("last_enter_game")->insert($s);
             
-    		$ret = array('code'=>200, 'token'=>$oauth_user["access_token"], 'data'=>$data, 'descrp'=>'登录成功');
+            $ret = array('code'=>200, 'token'=>$oauth_user["access_token"],
+            'last_login_server_id' => $last_login_server_id, 'data'=>$data, 'descrp'=>'登录成功');
     	}else{
     		$ret = array("code"=>500,"descrp"=>"登录失败");
 		}
