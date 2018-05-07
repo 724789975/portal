@@ -2,6 +2,7 @@
 namespace app\api\controller;
 
 use think\Db;
+use think\Config;
 use think\cache\driver\Redis;
 
 class Login
@@ -27,6 +28,9 @@ class Login
         $oauth_user["openid"] = $_POST["openid"];
         $login_server_id = $_POST["server_id"];
 
+        // connect_database($oauth_user["openid"]);
+        $db = Db::connect(get_database_cfg($oauth_user["openid"]));
+
         $last_login_server_id = 0;
 
         if (isset($_POST["sex"]))
@@ -50,22 +54,7 @@ class Login
             $oauth_user['user_email'] = $_POST["user_email"];
         }
 
-        $rules = array
-        (
-            array('platform', 'require', '来源不能为空', 1 ),
-            array('name', 'require', '名称不能为空', 1 ),
-            array('head_img', 'require', '头像不能为空！', 1 ),
-            array('access_token','require','access_token不能为空！',1),
-            array('expires_date','require','过期时长不能为空！',1),
-            array('openid','require','openid不能为空！',1),
-        );
-        // if($oauth_user_model->validate($rules)->create() === false)
-        // {
-        //     $ret = array("code"=>501,"descrp"=>$oauth_user_model->getError());
-        //     die(json_encode($ret));
-        // }
-
-        $find_oauth_user = Db::table("oauth_user")->where(array("openid"=>$oauth_user['openid']))->order("id ASC")->find();
+        $find_oauth_user = $db->table("oauth_user")->where(array("openid"=>$oauth_user['openid']))->order("id ASC")->find();
         $need_register = true;
         $login_status = true;
         $user_data = array();
@@ -76,13 +65,13 @@ class Login
                 $ret = array("code"=>502,"descrp"=>"您可能已经被列入黑名单，请联系管理员！");
                 die(json_encode($ret));
             }
-            $find_user = Db::table("users")->where(array("id"=>$find_oauth_user['uid']))->find();
+            $find_user = $db->table("users")->where(array("id"=>$find_oauth_user['uid']))->find();
             if(!empty($find_user))
             {
                 $last_login_server_id = $find_user["login_server_id"];
-                Db::table("oauth_user")->where(array("openid"=>$oauth_user['openid']))->order("id ASC")->update($oauth_user);
+                $db->table("oauth_user")->where(array("openid"=>$oauth_user['openid']))->order("id ASC")->update($oauth_user);
                 $find_user["login_server_id"] = $login_server_id;
-                Db::table("users")->where(array("id"=>$find_oauth_user['uid']))->update($find_user);
+                $db->table("users")->where(array("id"=>$find_oauth_user['uid']))->update($find_user);
                 $need_register = false;
             }
         }
@@ -98,7 +87,7 @@ class Login
                 "game_coin" => $game_coin,
                 "login_server_id" => $login_server_id,
             );
-            $new_user_id = Db::table("users")->insert($new_user_data, true, true);
+            $new_user_id = $db->table("users")->insert($new_user_data, true, true);
 
             if($new_user_id)
             {
@@ -107,20 +96,20 @@ class Login
                 {
                     $oauth_user["user_status"] = 1;
                     $oauth_user["uid"] = $new_user_id;
-                    $new_oauth_user_id = Db::table("oauth_user")->insert($oauth_user, true, true);
+                    $new_oauth_user_id = $db->table("oauth_user")->insert($oauth_user, true, true);
                     if($new_oauth_user_id)
                     {
                         $login_status = true;
                     }else
                     {
-                        Db::table("users")->where(array("id"=>$new_user_id))->delete();
+                        $db->table("users")->where(array("id"=>$new_user_id))->delete();
                         $login_status = false;
                     }
                 }else
                 {
                     $oauth_user["user_status"] = 1;
                     $oauth_user["uid"] = $new_user_id;
-                    Db::table("oauth_user")->where(array("openid"=>$oauth_user['openid']))->order("id ASC")->update($oauth_user);
+                    $db->table("oauth_user")->where(array("openid"=>$oauth_user['openid']))->order("id ASC")->update($oauth_user);
                 }
             }else
             {
@@ -181,7 +170,7 @@ class Login
                 "last_login_time" => date("Y-m-d H:i:s"),
                 "last_login_ip" => request()->ip(),
             );
-            Db::table("last_enter_game")->insert($s);
+            $db->table("last_enter_game")->insert($s);
             
             $ret = array('code'=>200, 'token'=>$oauth_user["access_token"],
             'last_login_server_id' => $last_login_server_id, 'data'=>$data, 'descrp'=>'登录成功');
