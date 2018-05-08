@@ -1,6 +1,7 @@
 <?php
 /*
 *命名
+当前最大玩家id current_player_id
 玩家信息 hset uid_role
 */
 return [

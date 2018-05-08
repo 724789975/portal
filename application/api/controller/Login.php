@@ -30,6 +30,7 @@ class Login
 
         // connect_database($oauth_user["openid"]);
         $db = Db::connect(get_database_cfg($oauth_user["openid"]));
+        $redis = new Redis($this->redis_config);
 
         $last_login_server_id = 0;
 
@@ -78,9 +79,11 @@ class Login
         
         if($need_register)
         {
+            $new_user_id = $redis->getHandler()->incr("current_player_id");
             $balance = 0;
             $game_coin = 0;
             $new_user_data = array(
+                "id" => $new_user_id,
                 "nick_name" => $oauth_user["name"],
                 "create_time" => date("Y-m-d H:i:s"),
                 "balance"   => $balance,
@@ -119,7 +122,6 @@ class Login
 
         if($login_status)
         {
-            $redis = new Redis($this->redis_config);
             $redis->getHandler()->set('test','hello redis');
             if($need_register)
             {
