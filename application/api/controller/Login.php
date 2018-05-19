@@ -174,9 +174,14 @@ class Login
             );
             $db->table("last_enter_game")->insert($s);
 
-            $team_id = $redis->getHandler()->get($uid."_team_id");
-            $game_ip = $redis->getHandler()->get("game_ip_$team_id");
-            $game_port = $redis->getHandler()->get("game_port_$team_id");
+            $game_ip = "";
+            $game_port = 0;
+            $team_id = $redis->getHandler()->get($uid."_player_team_id");
+            if ($team_id != false && $team_id != 0)
+            {
+                $game_ip = $redis->getHandler()->get("game_ip_$team_id");
+                $game_port = $redis->getHandler()->get("game_port_$team_id");
+            }
             
             $ret = array("code"=>200, "token"=>$oauth_user["access_token"],
                 "game_ip" => $game_ip, "game_port" => $game_port,
