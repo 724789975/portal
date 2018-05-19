@@ -14,12 +14,12 @@ class Login
     }
     public function index()
     {
-        return 'login';
+        return "login";
     }
 
     public function sendOauthUserInfo()
     {
-        \Think\Log::record("sendOauthUserInfo request : " . json_encode($_REQUEST, true),'INFO');
+        \Think\Log::record("sendOauthUserInfo request : " . json_encode($_REQUEST, true),"INFO");
         $oauth_user["platform"] = $_POST["platform"];
         $oauth_user["name"] = $_POST["name"];
         $oauth_user["head_img"] = $_POST["head_img"];
@@ -36,43 +36,43 @@ class Login
 
         if (isset($_POST["sex"]))
         {
-            $oauth_user['sex'] = $_POST["sex"];
+            $oauth_user["sex"] = $_POST["sex"];
         }
         if (isset($_POST["mobile"]))
         {
-            $oauth_user['mobile'] = $_POST["mobile"];
+            $oauth_user["mobile"] = $_POST["mobile"];
         }
         if (isset($_POST["location"]))
         {
-            $oauth_user['location'] = $_POST["location"];
+            $oauth_user["location"] = $_POST["location"];
         }
         if (isset($_POST["birthday"]))
         {
-            $oauth_user['birthday'] = $_POST["birthday"];
+            $oauth_user["birthday"] = $_POST["birthday"];
         }
         if (isset($_POST["user_email"]))
         {
-            $oauth_user['user_email'] = $_POST["user_email"];
+            $oauth_user["user_email"] = $_POST["user_email"];
         }
 
-        $find_oauth_user = $db->table("oauth_user")->where(array("openid"=>$oauth_user['openid']))->order("id ASC")->find();
+        $find_oauth_user = $db->table("oauth_user")->where(array("openid"=>$oauth_user["openid"]))->order("id ASC")->find();
         $need_register = true;
         $login_status = true;
         $user_data = array();
         if(!empty($find_oauth_user))
         {
-            if($find_oauth_user['user_status'] == '0')
+            if($find_oauth_user["user_status"] == "0")
             {
                 $ret = array("code"=>502,"descrp"=>"您可能已经被列入黑名单，请联系管理员！");
                 die(json_encode($ret));
             }
-            $find_user = $db->table("users")->where(array("id"=>$find_oauth_user['uid']))->find();
+            $find_user = $db->table("users")->where(array("id"=>$find_oauth_user["uid"]))->find();
             if(!empty($find_user))
             {
                 $last_login_server_id = $find_user["login_server_id"];
-                $db->table("oauth_user")->where(array("openid"=>$oauth_user['openid']))->order("id ASC")->update($oauth_user);
+                $db->table("oauth_user")->where(array("openid"=>$oauth_user["openid"]))->order("id ASC")->update($oauth_user);
                 $find_user["login_server_id"] = $login_server_id;
-                $db->table("users")->where(array("id"=>$find_oauth_user['uid']))->update($find_user);
+                $db->table("users")->where(array("id"=>$find_oauth_user["uid"]))->update($find_user);
                 $need_register = false;
             }
         }
@@ -112,7 +112,7 @@ class Login
                 {
                     $oauth_user["user_status"] = 1;
                     $oauth_user["uid"] = $new_user_id;
-                    $db->table("oauth_user")->where(array("openid"=>$oauth_user['openid']))->order("id ASC")->update($oauth_user);
+                    $db->table("oauth_user")->where(array("openid"=>$oauth_user["openid"]))->order("id ASC")->update($oauth_user);
                 }
             }else
             {
@@ -122,7 +122,7 @@ class Login
 
         if($login_status)
         {
-            $redis->getHandler()->set('test','hello redis');
+            $redis->getHandler()->set("test","hello redis");
             if($need_register)
             {
     			$data = array(
@@ -148,7 +148,7 @@ class Login
     			$data = array(
 	    			"id" => $find_oauth_user["uid"],
 	    			"nick_name" => $find_user["nick_name"],
-	    			"avatar" => $find_oauth_user['head_img'],
+	    			"avatar" => $find_oauth_user["head_img"],
 	    			"sex" => $find_oauth_user["sex"],
                     "balance" => $find_user["balance"],
 	    		);
@@ -173,13 +173,18 @@ class Login
                 "last_login_ip" => request()->ip(),
             );
             $db->table("last_enter_game")->insert($s);
+
+            $team_id = $redis->getHandler()->get($uid."_team_id");
+            $game_ip = $redis->getHandler()->get("game_ip_$team_id");
+            $game_port = $redis->getHandler()->get("game_port_$team_id");
             
-            $ret = array('code'=>200, 'token'=>$oauth_user["access_token"],
-            'last_login_server_id' => $last_login_server_id, 'data'=>$data, 'descrp'=>'登录成功');
+            $ret = array("code"=>200, "token"=>$oauth_user["access_token"],
+                "game_ip" => $game_ip, "game_port" => $game_port,
+                "last_login_server_id" => $last_login_server_id, "data"=>$data, "descrp"=>"登录成功");
     	}else{
     		$ret = array("code"=>500,"descrp"=>"登录失败");
 		}
-		\Think\Log::record("sendOauthUserInfo ret : " .json_encode($ret),'INFO');
+		\Think\Log::record("sendOauthUserInfo ret : " .json_encode($ret),"INFO");
     	die(json_encode($ret));
     }
 }
