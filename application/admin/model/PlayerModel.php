@@ -17,7 +17,7 @@ class PlayerModel extends Model
 
     public function getPlayerInfo()
     {
-        $ret = $this->query("SELECT * FROM users where id = $this->uid");
+        $ret = $this->query("SELECT * FROM users WHERE id = $this->uid");
         return $ret;
     }
 }
