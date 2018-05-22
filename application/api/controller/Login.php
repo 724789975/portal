@@ -80,6 +80,7 @@ class Login
         if($need_register)
         {
             $new_user_id = $redis->getHandler()->incr("current_player_id");
+            $new_user_id = $new_user_id * 256 + get_hash_id($oauth_user["openid"]);
             $balance = 0;
             $game_coin = 0;
             $new_user_data = array(
