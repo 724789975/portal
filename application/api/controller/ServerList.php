@@ -1,16 +1,13 @@
 <?php
 namespace app\api\controller;
 
-use think\Db;
+use app\admin\model\ServerListModel;
 
 class ServerList
 {
     public function index()
     {
-		$server_list = Db::query('SELECT * FROM server_list;');
-        $arrServerInfo = array(
-            "server_infos" => $server_list,
-        );
-        die(json_encode($arrServerInfo));
+        $ServerListModel = new ServerListModel();
+        die(json_encode($ServerListModel->getServerListInfo()));
     }
 }

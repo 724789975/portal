@@ -3,7 +3,6 @@
 namespace app\admin\model;
 
 use think\Model;
-use think\Db;
 
 class PlayerModel extends Model
 {
@@ -21,3 +20,5 @@ class PlayerModel extends Model
         return $ret;
     }
 }
+
+?>

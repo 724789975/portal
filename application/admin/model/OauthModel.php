@@ -3,7 +3,6 @@
 namespace app\admin\model;
 
 use think\Model;
-use think\Db;
 
 class OauthModel extends Model
 {
@@ -21,3 +20,5 @@ class OauthModel extends Model
         return $ret;
     }
 }
+
+?>
