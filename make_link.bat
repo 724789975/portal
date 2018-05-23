@@ -9,4 +9,7 @@ mklink /h application\admin\model\PlayerModel.php application\api\model\PlayerMo
 del application\admin\model\OauthModel.php
 mklink /h application\admin\model\OauthModel.php application\api\model\OauthModel.php
 
+del application\admin\model\ServerListModel.php
+mklink /h application\admin\model\ServerListModel.php application\api\model\ServerListModel.php
+
 
