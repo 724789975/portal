@@ -11,6 +11,6 @@ class ServerList
         $server_info = array(
             "server_infos" => $server_list_model->getServerListInfo(),
         );
-        die(json_encode($server_info));
+        die(json_encode($server_info, true));
     }
 }
